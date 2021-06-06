@@ -1,44 +1,112 @@
 import speech_recognition as sr
 import webbrowser
 from time import ctime
-
-r = sr.Recognizer()
-
-def record_audio(ask = False):
-    with sr.AudioFile('./voice_commands/time.wav') as source:
-        if ask:
-            print(ask)
-        audio = r.listen(source)
-        voice_data = ''
-        try:
-            voice_data = r.recognize_google(audio)
-           
-        except sr.UnknownValueError:
-            print("Sorry, I don't get that")
-        except sr.RequestError:
-            print("Sorry, the service is down")
-        return voice_data
+from tkinter import *
+import pyttsx3
+from time import sleep
 
 
-def respond(voice_data):
-    if 'what is your name' in voice_data:
-        print('My name is Friday')
 
-    if 'what time is it' in voice_data:
-        print(ctime())
-    
-    if 'what are you' in voice_data:
-        print('I am AI bot')   
-    
-    if 'search' in voice_data:
-        search = record_audio('What do you want to search for?')
-        url = 'https://google.com/search?q=' + search
-        webbrowser.get().open(url)
-        print("Here is what I've found for " + search)
-    
-
-print('How can I help you?')
-voice_data = record_audio()
-respond(voice_data)
+root = Tk()
+root.title('Python Script')
+root.geometry('800x500')
 
 
+# we need a text display
+display = Text(root, width=60, height=15)
+display.bind("<Key>", lambda e: "break")
+display.pack(pady=10)
+
+
+# text on display
+display_text = "Welcome To The Show"
+
+
+
+# ALL COMMANDS
+
+# empty command
+def empty_command():
+    global display_text
+    display_text = "NO COMMAND HAS BEEN GIVEN"
+    display.delete('1.0', END)
+    display.insert(END, display_text)
+
+
+
+# reads the display
+def talk():                                                             
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty("rate", 180)
+    engine.setProperty('voice', voices[1].id)
+    engine.say(display.get("1.0", END))
+    engine.runAndWait()
+
+
+# shows the time
+def time():
+    global display_text
+    display_text = ctime()
+    display.delete('1.0', END)
+    display.insert(END, display_text)
+
+
+def location():
+    global display_text
+    display_text = "Where...?"
+    display.delete('1.0', END)
+    display.insert(END, display_text)
+    my_entry.delete("0", END)
+    talk()
+
+
+
+def speak():
+
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty("rate", 180)
+    engine.setProperty('voice', voices[1].id)
+    engine.say("Hi, how are you?")
+    engine.runAndWait()
+
+
+# Take the Input
+my_entry = Entry(root, font=('Helvetica', 20))
+my_entry.pack(pady=10)
+
+
+
+def check_command(command):
+    if command.get() == '':
+        empty_command()
+
+    if 'time' in command.get():
+        time()
+
+    if 'speak' in command.get():
+        speak()
+
+    if 'location' in command.get():
+        location()
+
+
+def check_command_caller(event):
+    check_command(my_entry)
+
+
+go_btn = Button(root, text="GO", command= lambda: check_command(my_entry))
+root.bind('<Return>', check_command_caller)
+
+go_btn.pack(pady=8)
+
+
+read_btn = Button(root, text="READ", command=talk )
+read_btn.pack(pady=8)
+
+
+display.insert(END, display_text)
+
+
+root.mainloop()
