@@ -1,1 +1,1 @@
-# Python_Script
+# tterm project with tkinter
